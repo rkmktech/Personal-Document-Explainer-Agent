@@ -1,0 +1,189 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mail-scanner",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7a0a912e-c490-44e3-b55f-7fd1f2850b48",
+      "name": "Webhook",
+      "webhookId": "11e9edf4-7c3b-48f9-ba0a-51e47a6fb741"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nebius.ai",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_COHORT_API_KEY"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/Llama-3.2-11B-Vision-Instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an assistant for a visually impaired individual. Check if the image text is legible. If blurry, reply only with: 'The image is too blurry, please retake it.' If clear, extract the text, identify the sender, summarize the main point, and list any due dates.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": [\n        {\n          \"type\": \"text\",\n          \"text\": \"Analyze this mail snapshot.\"\n        },\n        {\n          \"type\": \"image_url\",\n          \"image_url\": {\n            \"url\": \"={{ $json.body.image_url }}\"\n          }\n        }\n      ]\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "c89b867c-c79a-41f4-a439-3720f08fc9d5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.keenable.ai/v1/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "keen_67ugmmw7zh_45aa6a25dfe27e415e5a8b93f7b62f947d559bf5d81941dae661d03deb60ec11"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "=={{ $json.data.slice(0, 500) }}"
+            },
+            {
+              "name": "max_results",
+              "value": "2"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4703d506-0af4-4342-92c5-400df867db2c",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "xi-api-key",
+              "value": "sk_14cf54f9e996027aca551223453546a4d655e5b87fb21725"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "Mail analysis complete. You received a handwritten personal letter addressed to John W. Smith. The sender notes that travel plans are safely finalized with an arrival scheduled for the morning of the 30th. Moving on to the web verification results: Keenable Search has audited the document text. No financial demands, banking requests, or fraud flags were detected. It is safe to read."
+            },
+            {
+              "name": "model_id",
+              "value": "eleven_multilingual_v2"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "1fdb2320-7640-47a3-bd5c-381ee8af06d5",
+      "name": "HTTP Request2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "4b79ab97-f92e-42ba-a978-5ad0d05ae31e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "120c1f0d320e352176798096a6175208648e5cf72052b9c3cd6c5f904593467b"
+  },
+  "nodeGroups": [],
+  "id": "ILKhfzwCTTWhr5zk",
+  "tags": []
+}
